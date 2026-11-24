@@ -1,0 +1,199 @@
+{
+  "manifest-version": "1",
+  "compiler-version": "0.36.1",
+  "compiler-commit": "7fa3a117c5e7efe9d2c51da04263e5f0b3509144",
+  "language-version": "0.28.0",
+  "runtime-version": "0.21.0",
+  "compiler": {
+    "type": "directory",
+    "contract-info.json": {
+      "type": "file",
+      "size": 10288,
+      "hash": "7917b425ef582224513c700b75173070dbf3d4cafd610dba1e92b28b3f48ab51"
+    }
+  },
+  "contract": {
+    "type": "directory",
+    "index.d.ts": {
+      "type": "file",
+      "size": 7631,
+      "hash": "6445653393d4f7f59dfb12bd5bc21c100ef91e113fbc823837055abcb31c7264"
+    },
+    "index.js": {
+      "type": "file",
+      "size": 149483,
+      "hash": "f1a7b2602cac3e4cec553e405c805f49a20fe1279e0b29cfe3749f8f49ead88c"
+    },
+    "index.js.map": {
+      "type": "file",
+      "size": 7524,
+      "hash": "0bb311615ca3cbd38c1c5b92dacb1e421637a4e612570eb5d2509d0337a452f5"
+    }
+  },
+  "zkir": {
+    "type": "directory",
+    "addVerifier.bzkir": {
+      "type": "file",
+      "size": 505,
+      "hash": "1bf5de0f4ce3cedcb8a3084a1ee7428ff22aa66d692513cfcd735d1f7f896989"
+    },
+    "addVerifier.zkir": {
+      "type": "file",
+      "size": 2118,
+      "hash": "15e2b6edb58b0f0edb8377baa765bbfd825b395dbb078f5dda1569c8b83960a9"
+    },
+    "collect.bzkir": {
+      "type": "file",
+      "size": 3446,
+      "hash": "cecdbcd9b5d7140ab02e8f9c5143ef033345a9168dec96de30164748247fe4fc"
+    },
+    "collect.zkir": {
+      "type": "file",
+      "size": 11443,
+      "hash": "8fd1e25f28259d4879b30bee328dfc41760238281b2b805e04762b1f58840f63"
+    },
+    "createJob.bzkir": {
+      "type": "file",
+      "size": 2263,
+      "hash": "23b614cd624f95e480460d3f70d12d07488626604ff72ef9015129c5ca23f173"
+    },
+    "createJob.zkir": {
+      "type": "file",
+      "size": 7434,
+      "hash": "a0ee2f46d4401f94273b6f16f46797f821ba774951a59b241a27c368379107e4"
+    },
+    "leave.bzkir": {
+      "type": "file",
+      "size": 1574,
+      "hash": "84eddb163ef1750b28ec7fe74a4eb718b2b48062ac3e777bc34a668d866f5e09"
+    },
+    "leave.zkir": {
+      "type": "file",
+      "size": 5284,
+      "hash": "ea238d584047d87b2107c122237189eafcfc4c2061dba022653c7f45af1e84b7"
+    },
+    "registerNode.bzkir": {
+      "type": "file",
+      "size": 1045,
+      "hash": "6047b591d12977ea64f57bcdee9f097b4ac835f5091c65a628d5a056cc1e775e"
+    },
+    "registerNode.zkir": {
+      "type": "file",
+      "size": 3515,
+      "hash": "fa96b9536723a560226d833c74e71cd85aedd9b8d5768f9e79767c4003a7e045"
+    },
+    "submitResult.bzkir": {
+      "type": "file",
+      "size": 1441,
+      "hash": "564c0ec850fa8ab3e60329c2a644b19aac4ae1cf20c56cedb91f25c732fbd6c1"
+    },
+    "submitResult.zkir": {
+      "type": "file",
+      "size": 5506,
+      "hash": "18b72a63a55228993f9ea72aa69b1d10e65d9c78e3333e393d7963bd4508f3f2"
+    },
+    "vote.bzkir": {
+      "type": "file",
+      "size": 4097,
+      "hash": "dacdb07e9c90427fca0ee1d4525f0fbc6af184b0a3cb3300454586467e1fd7f8"
+    },
+    "vote.zkir": {
+      "type": "file",
+      "size": 12587,
+      "hash": "88f4514bd2926a87059d6abb8a35ff48e9617ee4e98525ac1eabc51bcb4652b5"
+    },
+    "withdrawEarnings.bzkir": {
+      "type": "file",
+      "size": 1625,
+      "hash": "406f14ef1c8af1a4f1d13c3ff5a6d2f6ade4721bcf3ecdb89ee927b3be7b8d29"
+    },
+    "withdrawEarnings.zkir": {
+      "type": "file",
+      "size": 5320,
+      "hash": "db268304e376d02a0e239b29c1213250810cf0cff54e5cd341f00d837fb7db97"
+    }
+  },
+  "keys": {
+    "type": "directory",
+    "addVerifier.prover": {
+      "type": "file",
+      "size": 11277065,
+      "hash": "f1d47f34bf5d023d9f9f6541d6bc4652525c13124c43ddc60a4103f9105a90c5"
+    },
+    "addVerifier.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "0dac0bf25336072134a6579622c5f4c145633db9e8ea765b6e2f6344722d1755"
+    },
+    "collect.prover": {
+      "type": "file",
+      "size": 11280006,
+      "hash": "a8ce51d21335530dd0d38dd8eeade0323f31a74dae2a942840b4f5bf02859aa0"
+    },
+    "collect.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "34a38d7f41a0819f649691a601ee11e794a867a1e2df3b8d902af4a85c17c40e"
+    },
+    "createJob.prover": {
+      "type": "file",
+      "size": 11278823,
+      "hash": "652acd3b7c5e1145961ac36c5b88ff81144e4ddd690da5950823d5537f81692b"
+    },
+    "createJob.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "d3267613a670f5a5275e5433cbeba51b14043043603e10fed5bbd15c0acd4678"
+    },
+    "leave.prover": {
+      "type": "file",
+      "size": 11278134,
+      "hash": "fcde2924c32480c170210240725a441b7857aab27e4be43323dcd74dcbca1848"
+    },
+    "leave.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "6a66594562a6a95ff3f74b5b91150ee3ff7c6df46944648a9efb2d7ca9c5755c"
+    },
+    "registerNode.prover": {
+      "type": "file",
+      "size": 11277605,
+      "hash": "61ccd82fce01960231552cf8367167ab3bddc33aff39e0a517a17967055ec07b"
+    },
+    "registerNode.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "d0ba60de235362214804cdd2fb42fed6aab2aa077cacea219a75e4827ae35a9e"
+    },
+    "submitResult.prover": {
+      "type": "file",
+      "size": 11278001,
+      "hash": "45bcf5175f09443923246b7c7de2c1a797808f6558581ae8aa4af1e53d0c1a6b"
+    },
+    "submitResult.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "eab03862f186a6f44375950a5baeccae7fc3f8acf7571c84fc26bef56763a07b"
+    },
+    "vote.prover": {
+      "type": "file",
+      "size": 11280657,
+      "hash": "2ccedad6fbfa8004bc317e8abe034a9a9fd4e551cbfc3227cf120f6e29dc92db"
+    },
+    "vote.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "e0012b8c9ec29ae7953c2f13c425f1266c33952a3df0857af5ed9afd9b1aa98b"
+    },
+    "withdrawEarnings.prover": {
+      "type": "file",
+      "size": 11278185,
+      "hash": "509e4dbaf0f8352d8f5d0cd73fa08a89e9c79e89c55ef82defab3f9e082d38e2"
+    },
+    "withdrawEarnings.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "ece6a2c4deff2d0f4a3eb093d8fd66b60772b25c4e8e54eb96d4818fba0babb6"
+    }
+  }
+}

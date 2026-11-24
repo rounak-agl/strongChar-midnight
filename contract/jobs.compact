@@ -1,0 +1,209 @@
+// SPDX-License-Identifier: Apache-2.0
+//
+// Sealed training jobs.
+//
+// A job owner escrows a budget and names a registered trainer node. The training data and spec stay off-chain,
+// sealed with ML-KEM-1024 to the nodes that need them; the chain holds only a commitment to the spec. The trainer
+// submits the hash of its checkpoints. Two registered verifiers replay the run from the same sealed inputs and vote:
+// two passes pay the trainer, two fails slash the trainer's bond to the owner, and a split vote or a missed deadline
+// refunds the owner.
+//
+// Every actor proves who it is with a secret key it never reveals. An owner's key is bound to one job, so one
+// owner's jobs cannot be linked to each other on chain.
+
+pragma language_version 0.28;
+import CompactStandardLibrary;
+
+export enum JobState { OPEN, SUBMITTED, PASSED, FAILED, REFUNDED }
+
+export struct Node {
+  bond: Uint<64>,
+  kemKey: Bytes<32>,
+  earned: Uint<64>,
+  busy: Boolean
+}
+
+export struct Job {
+  owner: Bytes<32>,
+  spec: Bytes<32>,
+  budget: Uint<64>,
+  trainer: Bytes<32>,
+  submitBy: Uint<64>,
+  verdictBy: Uint<64>,
+  result: Bytes<32>,
+  state: JobState,
+  firstVerifier: Bytes<32>,
+  firstPass: Boolean,
+  votes: Uint<8>,
+  settled: Boolean
+}
+
+export sealed ledger admin: Bytes<32>;
+export ledger verifiers: Set<Bytes<32>>;
+export ledger nodes: Map<Bytes<32>, Node>;
+export ledger jobs: Map<Bytes<32>, Job>;
+
+witness localSecretKey(): Bytes<32>;
+
+export pure circuit adminKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "sealed-jobs:admin"), sk]);
+}
+
+export pure circuit nodeKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "sealed-jobs:node"), sk]);
+}
+
+export pure circuit verifierKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "sealed-jobs:verifier"), sk]);
+}
+
+export pure circuit ownerKey(sk: Bytes<32>, job: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "sealed-jobs:owner"), job, sk]);
+}
+
+constructor() {
+  admin = disclose(adminKey(localSecretKey()));
+}
+
+circuit loadJob(id: Bytes<32>): Job {
+  assert(jobs.member(id), "no such job");
+  return jobs.lookup(id);
+}
+
+// The admin seats verifiers by their public key hash; verifiers keep their secret keys to themselves.
+export circuit addVerifier(key: Bytes<32>): [] {
+  assert(adminKey(localSecretKey()) == admin, "only the admin seats verifiers");
+  verifiers.insert(disclose(key));
+}
+
+export circuit registerNode(kemKey: Bytes<32>, bond: Uint<64>): [] {
+  const k = disclose(nodeKey(localSecretKey()));
+  assert(!nodes.member(k), "node already registered");
+  const b = disclose(bond);
+  assert(b > 0, "a node must post a bond");
+  receiveUnshielded(nativeToken(), b as Uint<128>);
+  nodes.insert(k, Node { bond: b, kemKey: disclose(kemKey), earned: 0, busy: false });
+}
+
+export circuit createJob(
+  job: Bytes<32>,
+  spec: Bytes<32>,
+  budget: Uint<64>,
+  trainer: Bytes<32>,
+  submitBy: Uint<64>,
+  verdictBy: Uint<64>
+): [] {
+  const id = disclose(job);
+  assert(!jobs.member(id), "job id already used");
+  const t = disclose(trainer);
+  assert(nodes.member(t), "trainer is not a registered node");
+  const n = nodes.lookup(t);
+  assert(!n.busy, "trainer is on another job");
+  const b = disclose(budget);
+  assert(b > 0, "a job needs a budget");
+  // The bond must cover the budget, so a slashed trainer repays at least what the owner put in.
+  assert(n.bond >= b, "trainer's bond is below the budget");
+  const s = disclose(submitBy);
+  const v = disclose(verdictBy);
+  assert(s < v, "deadlines must be in order: submit, verdict");
+  assert(blockTimeLt(s), "submit deadline is in the past");
+
+  receiveUnshielded(nativeToken(), b as Uint<128>);
+  nodes.insert(t, Node { ...n, busy: true });
+  jobs.insert(id, Job {
+    owner: disclose(ownerKey(localSecretKey(), id)),
+    spec: disclose(spec),
+    budget: b,
+    trainer: t,
+    submitBy: s,
+    verdictBy: v,
+    result: default<Bytes<32>>,
+    state: JobState.OPEN,
+    firstVerifier: default<Bytes<32>>,
+    firstPass: false,
+    votes: 0,
+    settled: false
+  });
+}
+
+export circuit submitResult(job: Bytes<32>, result: Bytes<32>): [] {
+  const id = disclose(job);
+  const j = loadJob(id);
+  assert(j.state == JobState.OPEN, "job is not waiting for a result");
+  assert(blockTimeLt(j.submitBy), "submit deadline has passed");
+  assert(nodeKey(localSecretKey()) == j.trainer, "only the named trainer can submit");
+  jobs.insert(id, Job { ...j, result: disclose(result), state: JobState.SUBMITTED });
+}
+
+// A vote names the result it checked, so a verifier cannot be replayed onto a different result.
+export circuit vote(job: Bytes<32>, result: Bytes<32>, pass: Boolean): [] {
+  const id = disclose(job);
+  const j = loadJob(id);
+  assert(j.state == JobState.SUBMITTED, "job has no result to verify");
+  assert(blockTimeLt(j.verdictBy), "verdict deadline has passed");
+  assert(disclose(result) == j.result, "vote is for a different result");
+  const k = disclose(verifierKey(localSecretKey()));
+  assert(verifiers.member(k), "not a seated verifier");
+  const p = disclose(pass);
+
+  if (j.votes == 0) {
+    jobs.insert(id, Job { ...j, firstVerifier: k, firstPass: p, votes: 1 });
+  } else {
+    assert(k != j.firstVerifier, "this verifier already voted");
+    const n = nodes.lookup(j.trainer);
+    if (p && j.firstPass) {
+      // Both passed: the budget is the trainer's to withdraw.
+      nodes.insert(j.trainer, Node { ...n, earned: (n.earned + j.budget) as Uint<64>, busy: false });
+      jobs.insert(id, Job { ...j, votes: 2, state: JobState.PASSED, settled: true });
+    } else if (!p && !j.firstPass) {
+      // Both failed: the trainer loses the slice of its bond that covers the budget, and the owner gets that back
+      // along with the budget itself.
+      nodes.insert(j.trainer, Node { ...n, bond: (n.bond - j.budget) as Uint<64>, busy: false });
+      jobs.insert(id, Job { ...j, votes: 2, state: JobState.FAILED });
+    } else {
+      // Split vote: nobody can say who is right, so the owner is refunded and nobody is slashed.
+      nodes.insert(j.trainer, Node { ...n, busy: false });
+      jobs.insert(id, Job { ...j, votes: 2, state: JobState.REFUNDED });
+    }
+  }
+}
+
+// The owner collects what the job owes it: the budget back after a refund or a missed deadline, and the budget
+// plus the slashed bond slice after a failed verification.
+export circuit collect(job: Bytes<32>, to: UserAddress): [] {
+  const id = disclose(job);
+  const j = loadJob(id);
+  assert(ownerKey(localSecretKey(), id) == j.owner, "only the job owner can collect");
+  assert(!j.settled, "nothing left to collect");
+  const noResult = j.state == JobState.OPEN && blockTimeGte(j.submitBy);
+  const noQuorum = j.state == JobState.SUBMITTED && blockTimeGte(j.verdictBy);
+  assert(j.state == JobState.FAILED || j.state == JobState.REFUNDED || noResult || noQuorum, "job is still running");
+
+  if (noResult || noQuorum) {
+    const n = nodes.lookup(j.trainer);
+    nodes.insert(j.trainer, Node { ...n, busy: false });
+  }
+  const amount = j.state == JobState.FAILED ? (j.budget + j.budget) as Uint<64> : j.budget;
+  jobs.insert(id, Job { ...j, settled: true, state: j.state == JobState.FAILED ? JobState.FAILED : JobState.REFUNDED });
+  sendUnshielded(nativeToken(), amount as Uint<128>, right<ContractAddress, UserAddress>(disclose(to)));
+}
+
+export circuit withdrawEarnings(to: UserAddress): [] {
+  const k = disclose(nodeKey(localSecretKey()));
+  assert(nodes.member(k), "not a registered node");
+  const n = nodes.lookup(k);
+  assert(n.earned > 0, "nothing earned");
+  nodes.insert(k, Node { ...n, earned: 0 });
+  sendUnshielded(nativeToken(), n.earned as Uint<128>, right<ContractAddress, UserAddress>(disclose(to)));
+}
+
+// A node that is not on a job can leave and take its bond back.
+export circuit leave(to: UserAddress): [] {
+  const k = disclose(nodeKey(localSecretKey()));
+  assert(nodes.member(k), "not a registered node");
+  const n = nodes.lookup(k);
+  assert(!n.busy, "node is on a job");
+  assert(n.earned == 0, "withdraw earnings first");
+  nodes.remove(k);
+  sendUnshielded(nativeToken(), n.bond as Uint<128>, right<ContractAddress, UserAddress>(disclose(to)));
+}

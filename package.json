@@ -4,10 +4,12 @@
   "private": true,
   "type": "module",
   "license": "Apache-2.0",
-  "engines": { "node": ">=22.0.0" },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
-    "compile": "compact compile contract/contest.compact contract/managed/contest",
-    "compile:fast": "compact compile --skip-zk contract/contest.compact contract/managed/contest",
+    "compile": "compact compile contract/contest.compact contract/managed/contest && compact compile contract/jobs.compact contract/managed/jobs",
+    "compile:fast": "compact compile --skip-zk contract/contest.compact contract/managed/contest && compact compile --skip-zk contract/jobs.compact contract/managed/jobs",
     "typecheck": "tsc --noEmit -p .",
     "test:sim": "vitest run src/test"
   },
