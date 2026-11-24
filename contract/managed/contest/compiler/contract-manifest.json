@@ -1,0 +1,179 @@
+{
+  "manifest-version": "1",
+  "compiler-version": "0.36.1",
+  "compiler-commit": "7fa3a117c5e7efe9d2c51da04263e5f0b3509144",
+  "language-version": "0.28.0",
+  "runtime-version": "0.21.0",
+  "compiler": {
+    "type": "directory",
+    "contract-info.json": {
+      "type": "file",
+      "size": 12458,
+      "hash": "e709fcb7b7f428df67ce4558f1d88283cbc6fabcae1e02bc03900ff1a36e45bf"
+    }
+  },
+  "contract": {
+    "type": "directory",
+    "index.d.ts": {
+      "type": "file",
+      "size": 8465,
+      "hash": "56472df1cb7403679086d0526c04bed32992879a2ab26dd73bba4df3f6ef829f"
+    },
+    "index.js": {
+      "type": "file",
+      "size": 156849,
+      "hash": "e169ae21e37596f9b61d9006e652059ef30a20fa0807b643ff1a61b8208d0dd0"
+    },
+    "index.js.map": {
+      "type": "file",
+      "size": 7751,
+      "hash": "81a6024aad35dbfc76e6627b5b195d7d1d0d80eba0acca36e626b21f4ca4e62c"
+    }
+  },
+  "zkir": {
+    "type": "directory",
+    "claimForfeit.bzkir": {
+      "type": "file",
+      "size": 2615,
+      "hash": "4d40a0eb58ff6d5542949028c2ab1f97ea72c1df0a665604b91bf0d5e1326572"
+    },
+    "claimForfeit.zkir": {
+      "type": "file",
+      "size": 9322,
+      "hash": "55d4b69eb0f7f8ffa60c91d40cb0106839f9a9da1bd2806858f1ea368b4ed2f2"
+    },
+    "claimPrize.bzkir": {
+      "type": "file",
+      "size": 2396,
+      "hash": "c3ce0f1c7fe3eb4ff4ba98e1362dc8d98c7e5b43c6b710c97d84a7319c7f87b4"
+    },
+    "claimPrize.zkir": {
+      "type": "file",
+      "size": 8115,
+      "hash": "c2422d4488ce360eaa2b7ee8126b21648530a06be9a263d061696b6795fe7665"
+    },
+    "createContest.bzkir": {
+      "type": "file",
+      "size": 1749,
+      "hash": "e4468287552d8c8861ebd26de89163ce67fbcf78d56e728cc575f54eb2f3558b"
+    },
+    "createContest.zkir": {
+      "type": "file",
+      "size": 5597,
+      "hash": "b1fe28cf12337ed0e29ed374b92f49744347efb5a49802558097a747e7cf7c9b"
+    },
+    "enter.bzkir": {
+      "type": "file",
+      "size": 3733,
+      "hash": "fffeeb65d6b42462647d603a1bd4a2895234f9a4e1a6315c681988defd206746"
+    },
+    "enter.zkir": {
+      "type": "file",
+      "size": 21799,
+      "hash": "e73a11daaea00b9fde552a5ac7661cb72c112a52e6d6bcb20857faa6b306ccdd"
+    },
+    "proveScore.bzkir": {
+      "type": "file",
+      "size": 12426,
+      "hash": "63d935d864eb59c8fa18dfc6f946cd5d177a06d2c720c2eeea0761218ef4f005"
+    },
+    "proveScore.zkir": {
+      "type": "file",
+      "size": 52916,
+      "hash": "6143dc80176b6f1e9374527b043f5a41c432fdb90c2181aaa8b4b866f5fcc76a"
+    },
+    "reclaimPrize.bzkir": {
+      "type": "file",
+      "size": 2714,
+      "hash": "b529eddf2a919edabcd8f2d21a2fb8e2ea6b4b9de1f242a2c065575d2736079e"
+    },
+    "reclaimPrize.zkir": {
+      "type": "file",
+      "size": 9056,
+      "hash": "052a9a765d7421c6ade1dfcf05e578c9ab3a421b66fbebc71ca3b107e05d8892"
+    },
+    "revealLabels.bzkir": {
+      "type": "file",
+      "size": 4307,
+      "hash": "eaa37681e6dfeae88372acf8d4532c79be2914bd0b4ccee15c4e3ce7e0cfcf4d"
+    },
+    "revealLabels.zkir": {
+      "type": "file",
+      "size": 19952,
+      "hash": "d920173635b203b71e13e6f471af1f2effd8367d1d004e21f7ecb2c2cbe1950d"
+    }
+  },
+  "keys": {
+    "type": "directory",
+    "claimForfeit.prover": {
+      "type": "file",
+      "size": 11279175,
+      "hash": "d4da33f17088f328bb25cb721a30a7491ffccc80376954b704a24a167027865f"
+    },
+    "claimForfeit.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "db59775ad6afd3a1f7cefc929274db2828aad1f9e5b02355794c48e475ba622a"
+    },
+    "claimPrize.prover": {
+      "type": "file",
+      "size": 11278956,
+      "hash": "ffc5a0f8c355f5692e24a2366339e4197207b68f18da24b8107f6c1a82693d71"
+    },
+    "claimPrize.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "931a0a444137ac835100b1ff7bb641daf39b3de30e0579005f660035e9dcc21c"
+    },
+    "createContest.prover": {
+      "type": "file",
+      "size": 11278309,
+      "hash": "90a8e42f897c6b2417fbc752045eb46c917d1a4a67fe48831427a56ec6453446"
+    },
+    "createContest.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "64502a27e53bf27a9e80bcf9e8df523b43a08427a2fb85f53b89c863551808c4"
+    },
+    "enter.prover": {
+      "type": "file",
+      "size": 22552485,
+      "hash": "79d63e800f7c6fa65ef7f55c710b8446e651ee0396a59d373f28bb3776fa8c10"
+    },
+    "enter.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "6d0cbc9809b81aec194b35cd0443703af31a82fefa56840f8c4cabd850b15105"
+    },
+    "proveScore.prover": {
+      "type": "file",
+      "size": 22561178,
+      "hash": "c8f43d96c5d94c34cba4060f7bd46519ee1dcea13c8f2fbe0815eb1805b284bf"
+    },
+    "proveScore.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "a6261aa5058d6d432cf36adab7da4295f9141f78e0700f2f65c749f4d4a53ed8"
+    },
+    "reclaimPrize.prover": {
+      "type": "file",
+      "size": 11279274,
+      "hash": "9af76a7dd8703d562375415617d0b8616a004127ba1d0bb07546b0b6b888638f"
+    },
+    "reclaimPrize.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "058a4ebaea7aad8155b6ce2afa36fc1693c980c0fe7621676d3c25dbc90f2d05"
+    },
+    "revealLabels.prover": {
+      "type": "file",
+      "size": 22553059,
+      "hash": "f4ed5e8dcc67bdd8ff4d9067ef98ff3d6b67b38442e2bb616598e8a02e2a9a92"
+    },
+    "revealLabels.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "b4c11072e61e86412b856a3b9572c16c408b14a8c31278f4f986110c069e7895"
+    }
+  }
+}

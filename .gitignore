@@ -1,0 +1,5 @@
+node_modules/
+contract/managed/*/keys/
+.env*
+.private/
+CLAUDE.local.md

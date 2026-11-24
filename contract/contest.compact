@@ -1,0 +1,201 @@
+// SPDX-License-Identifier: Apache-2.0
+//
+// Sealed model contests.
+//
+// A host posts a prize and a commitment to the hidden test labels. Entrants commit to their predictions; the
+// predictions themselves never leave the entrant's machine. After entries close the host must open the label
+// commitment, and each entrant then proves in zero knowledge how many of their committed predictions match.
+// Only that count is published. The best proven count takes the prize. A host who never opens the labels forfeits
+// the prize to the entrants.
+//
+// What the chain can check: the labels the host opens are the ones committed before anyone entered; a score is
+// computed from predictions committed before the labels were known; nobody can copy an entry, because no entry is
+// ever public. What it cannot check: whether the host holds the labels to a real dataset, or whether a host enters
+// its own contest under another key (it would only win back its own prize).
+
+pragma language_version 0.28;
+import CompactStandardLibrary;
+
+// Every contest scores exactly this many test rows. Each label and prediction is a class index.
+export struct Contest {
+  host: Bytes<32>,
+  labelCommit: Bytes<32>,
+  dataset: Bytes<32>,
+  closesAt: Uint<64>,
+  revealBy: Uint<64>,
+  scoreBy: Uint<64>,
+  prize: Uint<64>,
+  entries: Uint<32>,
+  revealed: Boolean,
+  best: Uint<16>,
+  leader: Bytes<32>,
+  settled: Boolean
+}
+
+export ledger contests: Map<Bytes<32>, Contest>;
+// Entrant key (bound to one contest) -> commitment to that entrant's predictions.
+export ledger entries: Map<Bytes<32>, Bytes<32>>;
+// Entrant key -> proven number of correct predictions.
+export ledger scores: Map<Bytes<32>, Uint<16>>;
+// Contest id -> labels, once the host has opened them.
+export ledger labels: Map<Bytes<32>, Vector<64, Uint<8>>>;
+// Entrant keys that have taken their share of a forfeited prize.
+export ledger forfeitClaims: Set<Bytes<32>>;
+
+witness localSecretKey(): Bytes<32>;
+witness predictions(contest: Bytes<32>): Vector<64, Uint<8>>;
+witness predictionSalt(contest: Bytes<32>): Bytes<32>;
+witness labelSalt(contest: Bytes<32>): Bytes<32>;
+// prize / entries, computed off-chain; the circuit checks it.
+witness shareOf(prize: Uint<64>, entries: Uint<32>): Uint<64>;
+
+// Keys are bound to one contest, so the same person is unlinkable across contests.
+export pure circuit hostKey(sk: Bytes<32>, contest: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "sealed-contest:host"), contest, sk]);
+}
+
+export pure circuit entrantKey(sk: Bytes<32>, contest: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "sealed-contest:entrant"), contest, sk]);
+}
+
+export pure circuit commitLabels(l: Vector<64, Uint<8>>, salt: Bytes<32>): Bytes<32> {
+  return persistentCommit<Vector<64, Uint<8>>>(l, salt);
+}
+
+export pure circuit commitPredictions(p: Vector<64, Uint<8>>, salt: Bytes<32>): Bytes<32> {
+  return persistentCommit<Vector<64, Uint<8>>>(p, salt);
+}
+
+export pure circuit score(p: Vector<64, Uint<8>>, l: Vector<64, Uint<8>>): Uint<16> {
+  return fold((acc: Uint<16>, a: Uint<8>, b: Uint<8>): Uint<16> => (a == b ? acc + 1 : acc) as Uint<16>, 0 as Uint<16>, p, l);
+}
+
+circuit load(id: Bytes<32>): Contest {
+  assert(contests.member(id), "no such contest");
+  return contests.lookup(id);
+}
+
+export circuit createContest(
+  contest: Bytes<32>,
+  labelCommit: Bytes<32>,
+  dataset: Bytes<32>,
+  closesAt: Uint<64>,
+  revealBy: Uint<64>,
+  scoreBy: Uint<64>,
+  prize: Uint<64>
+): [] {
+  const id = disclose(contest);
+  assert(!contests.member(id), "contest id already used");
+  const c = disclose(closesAt);
+  const r = disclose(revealBy);
+  const s = disclose(scoreBy);
+  assert(c < r && r < s, "deadlines must be in order: close, reveal, score");
+  assert(blockTimeLt(c), "closing time is in the past");
+  const p = disclose(prize);
+  assert(p > 0, "a contest needs a prize");
+
+  receiveUnshielded(nativeToken(), p as Uint<128>);
+  contests.insert(id, Contest {
+    host: disclose(hostKey(localSecretKey(), id)),
+    labelCommit: disclose(labelCommit),
+    dataset: disclose(dataset),
+    closesAt: c,
+    revealBy: r,
+    scoreBy: s,
+    prize: p,
+    entries: 0,
+    revealed: false,
+    best: 0,
+    leader: default<Bytes<32>>,
+    settled: false
+  });
+}
+
+export circuit enter(contest: Bytes<32>): [] {
+  const id = disclose(contest);
+  const c = load(id);
+  assert(blockTimeLt(c.closesAt), "entries are closed");
+  const sk = localSecretKey();
+  assert(hostKey(sk, id) != c.host, "the host cannot enter with the host key");
+  const k = disclose(entrantKey(sk, id));
+  assert(!entries.member(k), "already entered");
+
+  entries.insert(k, disclose(commitPredictions(predictions(id), predictionSalt(id))));
+  contests.insert(id, Contest { ...c, entries: (c.entries + 1) as Uint<32> });
+}
+
+export circuit revealLabels(contest: Bytes<32>, l: Vector<64, Uint<8>>): [] {
+  const id = disclose(contest);
+  const c = load(id);
+  assert(hostKey(localSecretKey(), id) == c.host, "only the host can open the labels");
+  assert(!c.revealed, "labels already opened");
+  assert(blockTimeGte(c.closesAt), "entries are still open");
+  assert(blockTimeLt(c.revealBy), "the reveal deadline has passed");
+  assert(commitLabels(l, labelSalt(id)) == c.labelCommit, "these are not the committed labels");
+
+  labels.insert(id, disclose(l));
+  contests.insert(id, Contest { ...c, revealed: true });
+}
+
+export circuit proveScore(contest: Bytes<32>): [] {
+  const id = disclose(contest);
+  const c = load(id);
+  assert(c.revealed, "labels are not open yet");
+  assert(blockTimeLt(c.scoreBy), "scoring has closed");
+  const k = disclose(entrantKey(localSecretKey(), id));
+  assert(entries.member(k), "not entered in this contest");
+  assert(!scores.member(k), "score already proven");
+
+  const p = predictions(id);
+  assert(commitPredictions(p, predictionSalt(id)) == entries.lookup(k), "predictions differ from the committed entry");
+  const s = disclose(score(p, labels.lookup(id)));
+  scores.insert(k, s);
+  // Ties go to whoever proved first.
+  if (s > c.best) {
+    contests.insert(id, Contest { ...c, best: s, leader: k });
+  }
+}
+
+export circuit claimPrize(contest: Bytes<32>, to: UserAddress): [] {
+  const id = disclose(contest);
+  const c = load(id);
+  assert(c.revealed, "labels were never opened");
+  assert(blockTimeGte(c.scoreBy), "scoring is still open");
+  assert(!c.settled, "prize already paid");
+  assert(c.best > 0, "no score was proven");
+  assert(entrantKey(localSecretKey(), id) == c.leader, "not the winner");
+
+  contests.insert(id, Contest { ...c, settled: true });
+  sendUnshielded(nativeToken(), c.prize as Uint<128>, right<ContractAddress, UserAddress>(disclose(to)));
+}
+
+// The host takes the prize back only when nobody could have won it: no entries at all, or labels opened and no
+// score proven by the deadline.
+export circuit reclaimPrize(contest: Bytes<32>, to: UserAddress): [] {
+  const id = disclose(contest);
+  const c = load(id);
+  assert(hostKey(localSecretKey(), id) == c.host, "only the host can reclaim");
+  assert(!c.settled, "prize already paid");
+  const unclaimed = c.revealed && blockTimeGte(c.scoreBy) && c.best == 0;
+  const empty = c.entries == 0 && blockTimeGte(c.closesAt);
+  assert(unclaimed || empty, "the prize can still be won");
+
+  contests.insert(id, Contest { ...c, settled: true });
+  sendUnshielded(nativeToken(), c.prize as Uint<128>, right<ContractAddress, UserAddress>(disclose(to)));
+}
+
+// A host that never opens the labels forfeits the prize: every entrant may take an equal share.
+export circuit claimForfeit(contest: Bytes<32>, to: UserAddress): [] {
+  const id = disclose(contest);
+  const c = load(id);
+  assert(!c.revealed, "labels were opened; the contest is scored normally");
+  assert(blockTimeGte(c.revealBy), "the host can still open the labels");
+  const k = disclose(entrantKey(localSecretKey(), id));
+  assert(entries.member(k), "not entered in this contest");
+  assert(!forfeitClaims.member(k), "share already taken");
+
+  const q = disclose(shareOf(c.prize, c.entries));
+  assert(q * c.entries <= c.prize && c.prize < (q + 1) * c.entries, "wrong share");
+  forfeitClaims.insert(k);
+  sendUnshielded(nativeToken(), q as Uint<128>, right<ContractAddress, UserAddress>(disclose(to)));
+}
