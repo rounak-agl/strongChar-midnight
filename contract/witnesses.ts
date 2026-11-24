@@ -12,6 +12,8 @@ export type ContestSecrets = {
   /** This entrant's predictions, one class index per test row. */
   readonly predictions?: readonly number[];
   readonly predictionSalt?: Uint8Array;
+  /** Host side: the hidden labels, kept here until the reveal. No witness reads them. */
+  readonly labels?: readonly number[];
   /** Host side: the hidden labels' salt. */
   readonly labelSalt?: Uint8Array;
 };
@@ -22,7 +24,7 @@ export type ContestPrivateState = {
   readonly contests: Readonly<Record<string, ContestSecrets>>;
 };
 
-export const toHex = (b: Uint8Array): string => Buffer.from(b).toString('hex');
+export const toHex = (b: Uint8Array): string => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
 
 export const createPrivateState = (secretKey: Uint8Array): ContestPrivateState => ({ secretKey, contests: {} });
 

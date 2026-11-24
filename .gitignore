@@ -3,3 +3,9 @@ contract/managed/*/keys/
 .env*
 .private/
 CLAUDE.local.md
+.mnkit/
+midnight-level-db/
+logs/
+.wallet-state/
+deployments/local.json
+.strongchar/
