@@ -1,0 +1,38 @@
+/* Colours and type. Light first; the dark set follows the system setting. */
+:root {
+  --paper: #e8ecf3;
+  --card: #f7f9fc;
+  --ink: #1a2238;
+  --ink-soft: #55607a;
+  --wax: #a3271f;
+  --brass: #b08a2e;
+  --verdigris: #2d7a6a;
+  --rule: color-mix(in srgb, var(--ink) 18%, transparent);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #10162a;
+    --card: #18203a;
+    --ink: #e6eaf4;
+    --ink-soft: #9aa5bf;
+    --wax: #e0574b;
+    --brass: #d9b45a;
+    --verdigris: #5cc0a8;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-wax: var(--wax);
+  --color-brass: var(--brass);
+  --color-verdigris: var(--verdigris);
+  --color-rule: var(--rule);
+  --font-heading: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}

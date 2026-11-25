@@ -1,1 +1,41 @@
 @import "tailwindcss";
+@import "./design/tokens.css";
+
+@layer base {
+  body {
+    @apply min-h-screen bg-paper font-sans text-ink;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-heading font-semibold;
+  }
+  h1 {
+    @apply text-xl;
+  }
+  h2 {
+    @apply mb-2 text-lg;
+  }
+  a {
+    @apply underline;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-[6px] border border-rule bg-card p-5;
+  }
+  .button,
+  .button-primary {
+    @apply cursor-pointer rounded-[6px] border px-3 py-1.5 disabled:cursor-default disabled:opacity-50;
+  }
+  .button {
+    @apply border-rule bg-card;
+  }
+  .button-primary {
+    @apply border-wax bg-wax text-card;
+  }
+  .field {
+    @apply rounded-[6px] border border-rule bg-card px-2 py-1.5;
+  }
+}
