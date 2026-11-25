@@ -9,3 +9,6 @@ logs/
 .wallet-state/
 deployments/local.json
 .strongchar/
+.ref/
+ui/public/managed/
+ui/dist/
