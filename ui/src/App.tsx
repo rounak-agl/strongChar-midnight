@@ -4,6 +4,7 @@ import { WalletWidget } from './wallet/WalletWidget';
 import { PassphraseCard } from './wallet/PassphraseCard';
 import { ProvingSettings } from './wallet/ProvingSettings';
 import { useWallet } from './wallet/useWallet';
+import { deploymentFor } from './deployments';
 
 export function App() {
   return (
@@ -35,6 +36,15 @@ function Main() {
           Pick the network your wallet is set to, then connect. You&apos;ll need test funds on that network to pay fees.
         </p>
       </section>
+    );
+  }
+
+  const { contest, jobs } = deploymentFor(connection.networkId);
+  if (!contest && !jobs) {
+    return (
+      <p className="panel" role="status">
+        strongChar isn&apos;t deployed on {connection.networkId} yet.
+      </p>
     );
   }
 

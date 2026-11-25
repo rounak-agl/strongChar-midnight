@@ -4,6 +4,12 @@
 import type { InitialAPI } from "@midnight-ntwrk/dapp-connector-api";
 
 declare global {
+  interface ImportMetaEnv {
+    /** Local devnet contract addresses, for the dev server only (see src/deployments.ts). */
+    readonly VITE_CONTEST_ADDRESS?: string;
+    readonly VITE_JOBS_ADDRESS?: string;
+  }
+
   interface Window {
     // `@midnight-ntwrk/dapp-connector-api` already augments this on import; the
     // redeclaration keeps `window.midnight` typed project-wide. It must use the
