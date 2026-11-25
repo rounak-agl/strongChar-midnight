@@ -78,6 +78,18 @@ describe('wallet connection', () => {
     expect(screen.getByTestId('address')).toHaveTextContent('mn_addr_test1abc123');
   });
 
+  it('refuses a wallet that reports a non-test network', async () => {
+    const api = connectedApi('mainnet');
+    win.midnight = { 'a-uuid': wallet('a', vi.fn().mockResolvedValue(api)) };
+    renderWallet();
+
+    await userEvent.click(screen.getByText('connect now'));
+
+    await vi.waitFor(() => expect(status()).toHaveTextContent('error'));
+    expect(screen.getByRole('alert')).toHaveTextContent('test networks only');
+    expect(api.getUnshieldedAddress).not.toHaveBeenCalled();
+  });
+
   it("shows the connector's reason when the wallet refuses", async () => {
     const refusal = { type: 'DAppConnectorAPIError', code: 'Rejected', reason: 'User rejected the connection' };
     win.midnight = { 'a-uuid': wallet('a', vi.fn().mockRejectedValue(refusal)) };

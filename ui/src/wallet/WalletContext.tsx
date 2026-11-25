@@ -127,6 +127,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // requested id has to match the wallet's current network.
       const api = await wallet.connect(requestedNetworkId);
       const config = await api.getConfiguration();
+      // Belt and braces: whatever the wallet agreed to, only ever run against a test network.
+      if (!NETWORK_IDS.includes(config.networkId as NetworkId)) {
+        settle({
+          status: 'error',
+          message: `This app runs on test networks only, and your wallet is on "${config.networkId}". Switch Lace to Preview, Preprod or Undeployed.`,
+        });
+        return;
+      }
       const { unshieldedAddress } = await api.getUnshieldedAddress();
       if (mine !== attempt.current) return;
       settle({ status: 'connected', api, networkId: config.networkId, address: unshieldedAddress });

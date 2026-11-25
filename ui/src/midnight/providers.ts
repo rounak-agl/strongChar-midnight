@@ -184,8 +184,21 @@ export async function createContractProviders<C extends string>(
 }
 
 // Scoped per wallet account: switching accounts in the wallet switches stores.
+// Both contracts share one store instance per account and passphrase: one IndexedDB handle, one key derivation,
+// and one place to back up (it already scopes every read and write by contract address). A failed open isn't
+// kept, so a corrected passphrase is tried afresh.
+let shared: { accountId: string; passphrase: string; store: ReturnType<typeof persistentPrivateStateProvider> } | null =
+  null;
+
 function createPrivateStateProvider(accountId: string, passphrase: string) {
-  return persistentPrivateStateProvider({ accountId, passphrase });
+  if (shared?.accountId !== accountId || shared.passphrase !== passphrase) {
+    const store = persistentPrivateStateProvider({ accountId, passphrase });
+    shared = { accountId, passphrase, store };
+    store.catch(() => {
+      if (shared?.store === store) shared = null;
+    });
+  }
+  return shared.store;
 }
 
 async function createProofProvider<C extends string>(
