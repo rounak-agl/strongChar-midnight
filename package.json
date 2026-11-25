@@ -7,6 +7,9 @@
   "engines": {
     "node": ">=22.0.0"
   },
+  "workspaces": [
+    "ui"
+  ],
   "scripts": {
     "compile": "compact compile contract/contest.compact contract/managed/contest && compact compile contract/jobs.compact contract/managed/jobs",
     "compile:fast": "compact compile --skip-zk contract/contest.compact contract/managed/contest && compact compile --skip-zk contract/jobs.compact contract/managed/jobs",

@@ -1,0 +1,11 @@
+// Adapted from examples/battleship/ui/tsconfig.node.json in midnightntwrk/midnight-examples; modified for strongChar.
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "types": ["node"],
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo"
+  },
+  "include": ["vite.config.ts", "vitest.config.ts"]
+}
